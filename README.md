@@ -1,5 +1,7 @@
 # LLMs Comparison Tool
 
+<img src="screenshot.png">
+
 A web application that allows you to compare responses from different Large Language Models (LLMs) side by side. I created this tool because I was tired of switching between different platforms to compare responses from various AI models.
 
 ## Features
