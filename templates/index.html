@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Comparison</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <header class="mb-5">
+            <h1 class="text-center"><i class="bi bi-robot me-2"></i>LLM Comparison</h1>
+            <p class="text-center text-muted mb-0">Compare responses from leading AI language models side by side</p>
+        </header>
+        
+        <div class="card mb-5 query-card">
+            <div class="card-header d-flex align-items-center">
+                <i class="bi bi-chat-dots me-2"></i>
+                <h2>Your Question</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <textarea id="queryInput" class="form-control" rows="4" placeholder="Enter your question here..."></textarea>
+                </div>
+                
+                <div class="row model-selection-row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-lightning me-2"></i>
+                                <label for="openaiModelSelect" class="form-label mb-0">OpenAI Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="openaiModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-chat-square-text me-2"></i>
+                                <label for="anthropicModelSelect" class="form-label mb-0">Claude Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="anthropicModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-gem me-2"></i>
+                                <label for="geminiModelSelect" class="form-label mb-0">Gemini Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="geminiModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-search me-2"></i>
+                                <label for="deepseekModelSelect" class="form-label mb-0">DeepSeek Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="deepseekModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-wind me-2"></i>
+                                <label for="mistralModelSelect" class="form-label mb-0">Mistral Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="mistralModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card model-card">
+                            <div class="card-header d-flex align-items-center">
+                                <i class="bi bi-stars me-2"></i>
+                                <label for="grokModelSelect" class="form-label mb-0">Grok Model</label>
+                            </div>
+                            <div class="card-body">
+                                <select id="grokModelSelect" class="form-select" disabled>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="submitButton" class="btn btn-primary">
+                        <i class="bi bi-send me-2"></i>Compare Responses
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loadingIndicator" class="text-center d-none py-5">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 fs-5">Getting responses from models...</p>
+        </div>
+        
+        <div id="responseSection" class="d-none">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-chat-square-quote me-2 fs-4"></i>
+                    <h2 class="mb-0">Responses</h2>
+                </div>
+                <button id="downloadPdfBtn" class="btn btn-outline-primary">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Download PDF
+                </button>
+            </div>
+            
+            <div class="row g-4">
+                <!-- OpenAI Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card openai-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-lightning me-2"></i>
+                                <h3>OpenAI</h3>
+                            </div>
+                            <span id="openaiTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="openaiModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="openaiResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Claude Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card anthropic-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-chat-square-text me-2"></i>
+                                <h3>Claude</h3>
+                            </div>
+                            <span id="anthropicTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="anthropicModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="anthropicResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gemini Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card gemini-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-gem me-2"></i>
+                                <h3>Gemini</h3>
+                            </div>
+                            <span id="geminiTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="geminiModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="geminiResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DeepSeek Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card deepseek-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-search me-2"></i>
+                                <h3>DeepSeek</h3>
+                            </div>
+                            <span id="deepseekTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="deepseekModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="deepseekResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mistral Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card mistral-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-wind me-2"></i>
+                                <h3>Mistral</h3>
+                            </div>
+                            <span id="mistralTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="mistralModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="mistralResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grok Response -->
+                <div class="col-lg-6">
+                    <div class="card h-100 provider-card grok-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-stars me-2"></i>
+                                <h3>Grok</h3>
+                            </div>
+                            <span id="grokTime" class="badge"></span>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="grokModel" class="card-subtitle mb-3 text-muted fw-bold"></h4>
+                            <div id="grokResponse" class="response-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <p class="text-muted small">Note: Response times may vary based on model complexity and server load</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="py-4 mt-5 bg-light">
+        <div class="container">
+            <p class="text-center mb-0">
+                <small>Compare the world's leading AI language models in a unified interface</small>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
